@@ -20,7 +20,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
   WC <- array(0,c(nbeds,2,(ndays+1))) # Array - 3D matrix. 
   colnames(WC)<-c("patno","status")
   #NEW BEDS NEEDED
-  WN <- array(0,c(1000,2,(ndays+1))) # Array - 3D matrix. 
+  WN <- array(0,c(5000,2,(ndays+1))) # Array - 3D matrix. 
   colnames(WN)<-c("patno","status")
   # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
   
@@ -151,6 +151,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
       }
       # print(c("3",cumlos, pat_num,pat_status))
       # If empty bed don't store patient number 
+      
       if(pat_status == 3){
         WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays)] <- c(0,pat_status) # this patient stays until end of los
       }else{
@@ -199,9 +200,12 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     n <- n[-which(n$time == (ndays+1)),]
     
     ll <- n %>% group_by(bedno) %>% summarise(mean(patno)) # which beds actually have patients in
-    mm <- max(ifelse(length(which(ll[,2]>0,arr.ind = TRUE))>0,which(ll[,2]>0,arr.ind = TRUE),0)) # max bed number
+    mm <- ifelse(length(which(ll[,2]>0,arr.ind = TRUE))>0,max(which(ll[,2]>0,arr.ind = TRUE)),0) # max bed number
     ww <- which(n$bedno <= mm)
     n <- n[ww,]
+    
+    # Some of them have enough beds
+    if(dim(n)[1] == 0){n <- c(0,0,3)}
     
     bed_store <- rbind(bed_store, cbind(j,n))
     max_bed_need <- c(max_bed_need,mm)
@@ -244,7 +248,7 @@ sigmoid = function(params, x) {
 
 ## e.g.
 
-plot_eg <- function(output, name, norm_curve){
+plot_eg <- function(output, name, norm_curve, cov_curve){
   
   # Grab data
   # Basic time data to ndays days
@@ -256,7 +260,7 @@ plot_eg <- function(output, name, norm_curve){
   # Plot this
   p1 <- ggplot(h, aes(x = time, y = bedno) ) + 
     geom_point(aes(col = factor(status))) + 
-    scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","Covid")) + 
+    scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","COVID")) + 
     xlab("Day") + ylab("Bed number") +
     geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
   
@@ -265,20 +269,21 @@ plot_eg <- function(output, name, norm_curve){
   pcov$norm <- norm_curve
   pcovm <- melt(pcov, id.vars = "days")
   
-  p2 <- ggplot(pcovm, aes(x=days, y = value)) + geom_line(aes(group = variable)) + 
-    scale_x_continuous("Day") + scale_y_continuous("Number with COV19\non admin.") +
+  p2 <- ggplot(pcovm, aes(x=days, y = value)) + geom_line(aes(group = variable, col = variable)) + 
+    scale_x_continuous("Day") + scale_y_continuous("Daily admission\nneed") +
     geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed") + 
-    geom_hline(yintercept = mean(norm_curve)) + 
-    annotate(size = 2,'text',10, round(mean(norm_curve)+0.1), 
-             label=paste("Mean Normal incidence rate (daily):",round(mean(norm_curve))))
+    scale_colour_manual(name ="Status",values=c("norm"="darkgreen","cprev" = "red"),labels=c("Normal", "COVID")) +
+    geom_hline(yintercept = mean(norm_curve), lty = "dotted") + 
+    annotate(size = 2,'text',10, round(mean(norm_curve)+2), 
+             label=paste("Mean norm. (daily):",round(mean(norm_curve))))
   
   # Missing people
   miss <- melt(output$Aleft[,c("day","norm_admin","cov_admin")], id.vars = "day")
-  perc_not_treat <- round(100*output$pat_num/(output_nocovid$pat_num),0)
+  #perc_not_treat <- round(100*output$pat_num/(output_nocovid$pat_num),0)
   
   p3 <- ggplot(miss, aes(fill=variable, y=value, x=day)) + 
     geom_bar(position="stack", stat="identity") + 
-    scale_fill_manual(name  ="Status",values=c("norm_admin"="darkgreen","cov_admin" = "red"),labels=c("Normal", "Covid")) +
+    scale_fill_manual(name  ="Status",values=c("norm_admin"="darkgreen","cov_admin" = "red"),labels=c("Normal", "COVID")) +
     scale_y_continuous("Extra bed space\nneeded per day") + 
     scale_x_continuous("Day") + 
     #annotate(size = 2,'text',90, 20, 
@@ -304,10 +309,13 @@ plot_eg <- function(output, name, norm_curve){
   ww <- which(n$bedno <= mm)
   n <- n[ww,]
   
+  ymax = ifelse(mm > 500,5000,250)
+    
   g <- ggplot(n, aes(x = time, y = bedno) ) + 
     geom_point(aes(col = factor(status))) + 
-    scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","Covid")) + 
-    xlab("Day") + ylab("Bed number") + scale_y_continuous(lim=c(0,900)) +
+    scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","COVID")) + 
+    xlab("Day") + ylab("Bed number") + 
+    scale_y_continuous(lim=c(0,ymax)) +
     annotate(size = 2,'text',10, 15, 
              label=paste("Extra beds needed:",mm)) +
     geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
@@ -330,7 +338,8 @@ plot_multiple <- function(M,name){
              label=paste("Av. miss. covid:",round(miss_month$m_cov,0))) +
     annotate(size = 2,'text',30, 12, 
              label=paste("Extra beds needed:",round(mean(M$max_bed_need),0),
-                         "SD (",round(sd(M$max_bed_need),0),")"))
+                         "SD (",round(sd(M$max_bed_need),0),")")) + 
+    ggtitle(name)
   
   ggsave(paste0("plots/miss_",name,".pdf"))
   

@@ -72,10 +72,12 @@ output_wuh <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve, ndays=
 
 
 norm_curve <- rnorm(ndays,1,1)
+cov_curve <- c(sigmoid(c(12,0.3,30),seq(1,90,1)))
 output_wuh_devon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 
 norm_curve <- rnorm(ndays,7,1)
+cov_curve <- c(sigmoid(c(15,0.3,30),seq(1,90,1)))
 output_wuh_cuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 
@@ -94,9 +96,11 @@ norm_curve <- rnorm(ndays,16.3,1)
 output_dbwuh <- bed_filling(157, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 norm_curve <- rnorm(ndays,1,1)
+cov_curve <- c(sigmoid(c(24,0.3,30),seq(1,90,1)))
 output_dbwuh_devon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 norm_curve <- rnorm(ndays,7,1)
+cov_curve <- c(sigmoid(c(30,0.3,30),seq(1,90,1)))
 output_dbwuh_cuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 ####****************************************************************************************************************
@@ -114,9 +118,11 @@ norm_curve <- rnorm(ndays,16.3,1)
 output_slwuh <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 norm_curve <- rnorm(ndays,1,1)
+cov_curve <- c(sigmoid(c(12,0.15,45),seq(1,90,1)))
 output_sldevon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 norm_curve <- rnorm(ndays,7,1)
+cov_curve <- c(sigmoid(c(15,0.15,45),seq(1,90,1)))
 output_slcuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
 
 ####
