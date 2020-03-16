@@ -187,6 +187,8 @@ colnames(ff_store) <- c("setting","mean_extra","sd_extra")
 colnames(gg_store) <- c("setting","mean_total_norm","sd_total_norm", "mean_total_covid","sd_total_covid")
 
 
+
+
 #############**********************************************************************
 #############**********************************************************************
 #############**********************************************************************
@@ -246,4 +248,5 @@ gg_store <- as.data.frame(gg_store)
 colnames(cc_store) <- c("setting","month","mean_norm","mean_covid")
 colnames(ff_store) <- c("setting","mean_extra","sd_extra")
 colnames(gg_store) <- c("setting","mean_total_norm","sd_total_norm", "mean_total_covid","sd_total_covid")
+
 

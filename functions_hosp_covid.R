@@ -199,7 +199,7 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     n <- n[-which(n$time == (ndays+1)),]
     
     ll <- n %>% group_by(bedno) %>% summarise(mean(patno)) # which beds actually have patients in
-    mm <- max(which(ll[,2]>0,arr.ind = TRUE)) # max bed number
+    mm <- max(ifelse(length(which(ll[,2]>0,arr.ind = TRUE))>0,which(ll[,2]>0,arr.ind = TRUE),0)) # max bed number
     ww <- which(n$bedno <= mm)
     n <- n[ww,]
     
@@ -340,3 +340,7 @@ plot_multiple <- function(M,name){
   write.csv(c(round(mean(M$max_bed_need),0),round(sd(M$max_bed_need),0)),paste0("outputs/",name,"_extrabed.csv"))
   write.csv(M$total_missed, paste0("outputs/",name,"_totalmissed.csv"))
 }
+
+
+
+
