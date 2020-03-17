@@ -83,12 +83,12 @@ plot_eg(output_wuh, "wuh_ichnt", norm_curve, cov_curve)
 norm_curve <- rnorm(ndays,1,1)
 cov_curve <- c(sigmoid(c(12,0.3,30),seq(1,90,1)))
 output_wuh_devon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_wuh_devon, "wuh_devon", inc_rate = 1)
+plot_eg(output_wuh_devon, "wuh_devon", norm_curve, cov_curve)
 
 cov_curve <- c(sigmoid(c(15,0.3,30),seq(1,90,1)))
 norm_curve <- rnorm(ndays,7,1)
 output_wuh_cuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_wuh_cuh, "wuh_cuh", inc_rate = 7)
+plot_eg(output_wuh_cuh, "wuh_cuh", norm_curve, cov_curve)
 
 
 ####****************************************************************************************************************
@@ -120,17 +120,17 @@ write.csv(M_dbcuh$bed_store,"outputs/dbwuh_cuh.csv")
 norm_curve <- rnorm(ndays,16.3,1)
 cov_curve <- c(sigmoid(c(15,0.3,30),seq(1,90,1)))
 output_dbwuh <- bed_filling(157, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_dbwuh, "dbwuh_ichnt", inc_rate = 16.3)
+plot_eg(output_dbwuh, "dbwuh_ichnt", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,1,1)
 cov_curve <- c(sigmoid(c(24,0.3,30),seq(1,90,1)))
 output_dbwuh_devon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_dbwuh_devon, "dbwuh_devon", inc_rate = 1)
+plot_eg(output_dbwuh_devon, "dbwuh_devon", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,7,1)
 cov_curve <- c(sigmoid(c(30,0.3,30),seq(1,90,1)))
 output_dbwuh_cuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_dbwuh_cuh, "dbwuh_cuh", inc_rate = 7)
+plot_eg(output_dbwuh_cuh, "dbwuh_cuh", norm_curve, cov_curve)
 
 
 ####****************************************************************************************************************
@@ -169,17 +169,17 @@ write.csv(M_slcuh$bed_store,"outputs/slwuh_cuh.csv")
 norm_curve <- rnorm(ndays,16.3,1)
 cov_curve <- c(sigmoid(c(15,0.3,45),seq(1,90,1)))
 output_slwuh <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_slwuh, "slwuh_ichnt", inc_rate = 16.3)
+plot_eg(output_slwuh, "slwuh_ichnt", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,1,1)
 cov_curve <- c(sigmoid(c(12,0.15,45),seq(1,90,1)))
 output_sldevon <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_sldevon, "slwuh_devon", inc_rate = 1)
+plot_eg(output_sldevon, "slwuh_devon", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,7,1)
 cov_curve <- c(sigmoid(c(15,0.15,45),seq(1,90,1)))
 output_slcuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_slcuh, "slwuh_cuh", inc_rate = 7)
+plot_eg(output_slcuh, "slwuh_cuh", norm_curve, cov_curve)
 
 
 
@@ -215,17 +215,17 @@ write.csv(M_wuhc2$bed_store,"outputs/halfn_wuh_cuh.csv")
 norm_curve <- rnorm(ndays,16.3/2,1)
 cov_curve <- c(sigmoid(c(15,0.3,30),seq(1,90,1)))
 output_wuh2 <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve, ndays=90)
-plot_eg(output_wuh2, "halfn_wuh_ichnt", norm_curve)
+plot_eg(output_wuh2, "halfn_wuh_ichnt", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,1/2,1)
 cov_curve <- c(sigmoid(c(12,0.3,30),seq(1,90,1)))
 output_wuh_devon2 <- bed_filling(18, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_wuh_devon2, "halfn_wuh_devon", norm_curve)
+plot_eg(output_wuh_devon2, "halfn_wuh_devon",norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,7/2,1)
 cov_curve <- c(sigmoid(c(15,0.3,30),seq(1,90,1)))
 output_wuh_cuh2 <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90)
-plot_eg(output_wuh_cuh2, "halfn_wuh_cuh", norm_curve)
+plot_eg(output_wuh_cuh2, "halfn_wuh_cuh", norm_curve, cov_curve)
 
 #### Table of outputs
 
@@ -254,5 +254,9 @@ gg_store <- as.data.frame(gg_store)
 colnames(cc_store) <- c("setting","month","mean_norm","mean_covid")
 colnames(ff_store) <- c("setting","mean_extra","sd_extra")
 colnames(gg_store) <- c("setting","mean_total_norm","sd_total_norm", "mean_total_covid","sd_total_covid")
+
+##### How many cases to NOT BREAK NHS
+# Could do 
+
 
 

@@ -1,0 +1,384 @@
+﻿Region,Code,Name,Number of Adult critical care beds,Number of Paediatric intensive care beds,Number of Neonatal critical care cots (or beds),Number of Adult critical care beds,Number of Paediatric intensive care beds,Number of Neonatal critical care cots (or beds),Adult critical care beds,Paediatric intensive care beds,Neonatal critical care cots (or beds),Number of Non-medical Critical care transfers
+East of England Commissioning Region,RDD,Basildon and Thurrock University Hospitals NHS Foundation Trust,34,0,8,34,0,6,100.0%,0.0%,75.0%,0
+East of England Commissioning Region,RC1,Bedford Hospital NHS Trust,11,0,3,3,0,1,27.3%,0.0%,33.3%,0
+East of England Commissioning Region,RGT,Cambridge University Hospitals NHS Foundation Trust,64,13,58,54,10,38,84.4%,76.9%,65.5%,0
+East of England Commissioning Region,RWH,East and North Hertfordshire NHS Trust,18,0,10,11,0,5,61.1%,0.0%,50.0%,0
+East of England Commissioning Region,RDE,East Suffolk and North Essex NHS Foundation Trust,25,0,10,20,0,5,80.0%,0.0%,50.0%,0
+East of England Commissioning Region,RGP,James Paget University Hospitals NHS Foundation Trust,12,0,2,5,0,0,41.7%,0.0%,0.0%,0
+East of England Commissioning Region,RC9,Luton and Dunstable University Hospital NHS Foundation Trust,17,0,19,10,0,19,58.8%,0.0%,100.0%,0
+East of England Commissioning Region,RQ8,Mid Essex Hospital Services NHS Trust,21,0,6,10,0,1,47.6%,0.0%,16.7%,0
+East of England Commissioning Region,RD8,Milton Keynes University Hospital NHS Foundation Trust,9,0,6,7,0,2,77.8%,0.0%,33.3%,0
+East of England Commissioning Region,RM1,Norfolk and Norwich University Hospitals NHS Foundation Trust,28,0,15,19,0,10,67.9%,0.0%,66.7%,0
+East of England Commissioning Region,RGN,North West Anglia NHS Foundation Trust,22,0,5,17,0,3,77.3%,0.0%,60.0%,2
+East of England Commissioning Region,RGM,Royal Papworth Hospital NHS Foundation Trust,0,0,0,0,0,0,0.0%,0.0%,0.0%,0
+East of England Commissioning Region,RAJ,Southend University Hospital NHS Foundation Trust,26,0,4,23,0,0,88.5%,0.0%,0.0%,0
+East of England Commissioning Region,RQW,The Princess Alexandra Hospital NHS Trust,9,0,6,6,0,5,66.7%,0.0%,83.3%,0
+East of England Commissioning Region,RCX,"The Queen Elizabeth Hospital, King's Lynn, NHS Foundation Trust",13,0,12,11,0,4,84.6%,0.0%,33.3%,0
+East of England Commissioning Region,RWG,West Hertfordshire Hospitals NHS Trust,19,0,3,11,0,0,57.9%,0.0%,0.0%,0
+East of England Commissioning Region,RGR,West Suffolk NHS Foundation Trust,9,0,12,6,0,4,66.7%,0.0%,33.3%,0
+London Commissioning Region,RF4,"Barking, Havering and Redbridge University Hospitals NHS Trust",52,0,11,33,0,3,63.5%,0.0%,27.3%,0
+London Commissioning Region,R1H,Barts Health NHS Trust,122,4,57,93,3,44,76.2%,75.0%,77.2%,0
+London Commissioning Region,RQM,Chelsea and Westminster Hospital NHS Foundation Trust,22,0,38,18,0,35,81.8%,0.0%,92.1%,0
+London Commissioning Region,RJ6,Croydon Health Services NHS Trust,14,0,4,14,0,0,100.0%,0.0%,0.0%,1
+London Commissioning Region,RVR,Epsom and St Helier University Hospitals NHS Trust,21,0,2,13,0,1,61.9%,0.0%,50.0%,0
+London Commissioning Region,RP4,Great Ormond Street Hospital For Children NHS Foundation Trust,0,27,6,0,26,6,0.0%,96.3%,100.0%,0
+London Commissioning Region,RJ1,Guy's and St Thomas' NHS Foundation Trust,82,20,20,66,14,16,80.5%,70.0%,80.0%,0
+London Commissioning Region,RQX,Homerton University Hospital NHS Foundation Trust,10,0,20,8,0,20,80.0%,0.0%,100.0%,0
+London Commissioning Region,RYJ,Imperial College Healthcare NHS Trust,157,13,27,129,10,23,82.2%,76.9%,85.2%,0
+London Commissioning Region,RJZ,King's College Hospital NHS Foundation Trust,96,12,37,89,11,36,92.7%,91.7%,97.3%,0
+London Commissioning Region,RAX,Kingston Hospital NHS Foundation Trust,14,0,6,10,0,6,71.4%,0.0%,100.0%,0
+London Commissioning Region,RJ2,Lewisham and Greenwich NHS Trust,33,0,5,28,0,2,84.8%,0.0%,40.0%,0
+London Commissioning Region,R1K,London North West University Healthcare NHS Trust,33,0,5,28,0,0,84.8%,0.0%,0.0%,0
+London Commissioning Region,RAP,North Middlesex University Hospital NHS Trust,10,0,6,9,0,5,90.0%,0.0%,83.3%,0
+London Commissioning Region,RT3,Royal Brompton and Harefield NHS Foundation Trust,104,16,0,53,7,0,51.0%,43.8%,0.0%,0
+London Commissioning Region,RAL,Royal Free London NHS Foundation Trust,79,0,6,64,0,3,81.0%,0.0%,50.0%,0
+London Commissioning Region,RAN,Royal National Orthopaedic Hospital NHS Trust,14,0,0,3,0,0,21.4%,0.0%,0.0%,0
+London Commissioning Region,RJ7,St George's University Hospitals NHS Foundation Trust,60,12,37,55,11,36,91.7%,91.7%,97.3%,0
+London Commissioning Region,RAS,The Hillingdon Hospitals NHS Foundation Trust,9,0,8,7,0,7,77.8%,0.0%,87.5%,0
+London Commissioning Region,RPY,The Royal Marsden NHS Foundation Trust,16,0,0,5,0,0,31.3%,0.0%,0.0%,0
+London Commissioning Region,RRV,University College London Hospitals NHS Foundation Trust,61,0,32,46,0,29,75.4%,0.0%,90.6%,0
+London Commissioning Region,RKE,Whittington Health NHS Trust,10,0,23,9,0,15,90.0%,0.0%,65.2%,0
+Midlands Commissioning Region,RQ3,Birmingham Women's and Children's NHS Foundation Trust,6,23,12,6,23,7,100.0%,100.0%,58.3%,14
+Midlands Commissioning Region,RFS,Chesterfield Royal Hospital NHS Foundation Trust,15,0,6,13,0,6,86.7%,0.0%,100.0%,0
+Midlands Commissioning Region,RLT,George Eliot Hospital NHS Trust,8,0,0,8,0,0,100.0%,0.0%,0.0%,0
+Midlands Commissioning Region,RNQ,Kettering General Hospital NHS Foundation Trust,12,0,4,10,0,0,83.3%,0.0%,0.0%,0
+Midlands Commissioning Region,RNS,Northampton General Hospital NHS Trust,16,0,2,8,0,0,50.0%,0.0%,0.0%,0
+Midlands Commissioning Region,RX1,Nottingham University Hospitals NHS Trust,92,8,24,64,6,20,69.6%,75.0%,83.3%,0
+Midlands Commissioning Region,RXK,Sandwell and West Birmingham Hospitals NHS Trust,21,0,10,15,0,10,71.4%,0.0%,100.0%,0
+Midlands Commissioning Region,RK5,Sherwood Forest Hospitals NHS Foundation Trust,11,0,10,10,0,5,90.9%,0.0%,50.0%,0
+Midlands Commissioning Region,RXW,Shrewsbury and Telford Hospital NHS Trust,18,0,6,16,0,2,88.9%,0.0%,33.3%,0
+Midlands Commissioning Region,RJC,South Warwickshire NHS Foundation Trust,7,0,0,4,0,0,57.1%,0.0%,0.0%,0
+Midlands Commissioning Region,RNA,The Dudley Group NHS Foundation Trust,20,0,18,18,0,9,90.0%,0.0%,50.0%,0
+Midlands Commissioning Region,RL1,The Robert Jones and Agnes Hunt Orthopaedic Hospital NHS Foundation Trust,4,0,0,2,0,0,50.0%,0.0%,0.0%,0
+Midlands Commissioning Region,RRJ,The Royal Orthopaedic Hospital NHS Foundation Trust,7,0,0,4,0,0,57.1%,0.0%,0.0%,0
+Midlands Commissioning Region,RL4,The Royal Wolverhampton NHS Trust,28,0,14,17,0,13,60.7%,0.0%,92.9%,0
+Midlands Commissioning Region,RWD,United Lincolnshire Hospitals NHS Trust,31,0,23,20,0,12,64.5%,0.0%,52.2%,0
+Midlands Commissioning Region,RRK,University Hospitals Birmingham NHS Foundation Trust,93,0,12,87,0,12,93.5%,0.0%,100.0%,0
+Midlands Commissioning Region,RKB,University Hospitals Coventry and Warwickshire NHS Trust,37,0,27,35,0,17,94.6%,0.0%,63.0%,4
+Midlands Commissioning Region,RTG,University Hospitals of Derby and Burton NHS Foundation Trust,55,0,27,37,0,13,67.3%,0.0%,48.1%,2
+Midlands Commissioning Region,RWE,University Hospitals of Leicester NHS Trust,77,14,42,46,13,36,59.7%,92.9%,85.7%,0
+Midlands Commissioning Region,RJE,University Hospitals of North Midlands NHS Trust,82,6,12,64,2,12,78.0%,33.3%,100.0%,0
+Midlands Commissioning Region,RBK,Walsall Healthcare NHS Trust,13,0,2,9,0,1,69.2%,0.0%,50.0%,0
+Midlands Commissioning Region,RWP,Worcestershire Acute Hospitals NHS Trust,21,0,6,13,0,5,61.9%,0.0%,83.3%,0
+Midlands Commissioning Region,RLQ,Wye Valley NHS Trust,6,0,1,6,0,0,100.0%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RCF,Airedale NHS Foundation Trust,7,0,3,5,0,0,71.4%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RFF,Barnsley Hospital NHS Foundation Trust,11,0,2,11,0,1,100.0%,0.0%,50.0%,0
+North East and Yorkshire Commissioning Region,RAE,Bradford Teaching Hospitals NHS Foundation Trust,16,0,7,13,0,5,81.3%,0.0%,71.4%,0
+North East and Yorkshire Commissioning Region,RWY,Calderdale and Huddersfield NHS Foundation Trust,13,0,6,10,0,3,76.9%,0.0%,50.0%,1
+North East and Yorkshire Commissioning Region,RXP,County Durham and Darlington NHS Foundation Trust,21,0,0,15,0,0,71.4%,0.0%,0.0%,1
+North East and Yorkshire Commissioning Region,RP5,Doncaster and Bassetlaw Teaching Hospitals NHS Foundation Trust,20,0,0,11,0,0,55.0%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RR7,Gateshead Health NHS Foundation Trust,12,0,0,7,0,0,58.3%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RCD,Harrogate and District NHS Foundation Trust,8,0,0,5,0,0,62.5%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RWA,Hull University Teaching Hospitals NHS Trust,44,0,5,27,0,5,61.4%,0.0%,100.0%,1
+North East and Yorkshire Commissioning Region,RR8,Leeds Teaching Hospitals NHS Trust,104,16,30,84,10,20,80.8%,62.5%,66.7%,1
+North East and Yorkshire Commissioning Region,RXF,Mid Yorkshire Hospitals NHS Trust,20,0,7,13,0,7,65.0%,0.0%,100.0%,0
+North East and Yorkshire Commissioning Region,RNN,North Cumbria Integrated Care NHS Foundation Trust,15,0,0,15,0,0,100.0%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RVW,North Tees and Hartlepool NHS Foundation Trust,16,0,0,12,0,0,75.0%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RJL,Northern Lincolnshire and Goole NHS Foundation Trust,14,0,22,11,0,9,78.6%,0.0%,40.9%,0
+North East and Yorkshire Commissioning Region,RTF,Northumbria Healthcare NHS Foundation Trust,15,0,0,7,0,0,46.7%,0.0%,0.0%,0
+North East and Yorkshire Commissioning Region,RCU,Sheffield Children's NHS Foundation Trust,0,9,2,0,5,2,0.0%,55.6%,100.0%,0
+North East and Yorkshire Commissioning Region,RHQ,Sheffield Teaching Hospitals NHS Foundation Trust,118,0,48,83,0,28,70.3%,0.0%,58.3%,0
+North East and Yorkshire Commissioning Region,RTR,South Tees Hospitals NHS Foundation Trust,50,0,15,45,0,10,90.0%,0.0%,66.7%,3
+North East and Yorkshire Commissioning Region,R0B,South Tyneside and Sunderland NHS Foundation Trust,24,0,8,12,0,7,50.0%,0.0%,87.5%,0
+North East and Yorkshire Commissioning Region,RTD,The Newcastle Upon Tyne Hospitals NHS Foundation Trust,86,29,12,60,21,11,69.8%,72.4%,91.7%,0
+North East and Yorkshire Commissioning Region,RFR,The Rotherham NHS Foundation Trust,10,0,4,10,0,4,100.0%,0.0%,100.0%,0
+North East and Yorkshire Commissioning Region,RCB,York Teaching Hospital NHS Foundation Trust,19,0,2,16,0,2,84.2%,0.0%,100.0%,0
+North West Commissioning Region,RBS,Alder Hey Children's NHS Foundation Trust,0,21,0,0,16,0,0.0%,76.2%,0.0%,0
+North West Commissioning Region,RXL,Blackpool Teaching Hospitals NHS Foundation Trust,34,0,4,20,0,0,58.8%,0.0%,0.0%,0
+North West Commissioning Region,RMC,Bolton NHS Foundation Trust,18,0,17,15,0,17,83.3%,0.0%,100.0%,0
+North West Commissioning Region,RJR,Countess of Chester Hospital NHS Foundation Trust,15,0,0,14,0,0,93.3%,0.0%,0.0%,0
+North West Commissioning Region,RJN,East Cheshire NHS Trust,6,0,1,4,0,0,66.7%,0.0%,0.0%,0
+North West Commissioning Region,RXR,East Lancashire Hospitals NHS Trust,24,0,8,18,0,3,75.0%,0.0%,37.5%,0
+North West Commissioning Region,RXN,Lancashire Teaching Hospitals NHS Foundation Trust,32,0,7,26,0,5,81.3%,0.0%,71.4%,0
+North West Commissioning Region,RBQ,Liverpool Heart and Chest Hospital NHS Foundation Trust,34,0,0,20,0,0,58.8%,0.0%,0.0%,0
+North West Commissioning Region,REM,Liverpool University Hospitals NHS Foundation Trust,59,0,0,49,0,0,83.1%,0.0%,0.0%,0
+North West Commissioning Region,REP,Liverpool Women's NHS Foundation Trust,2,0,24,0,0,20,0.0%,0.0%,83.3%,2
+North West Commissioning Region,R0A,Manchester University NHS Foundation Trust,108,17,40,81,15,30,75.0%,88.2%,75.0%,0
+North West Commissioning Region,RBT,Mid Cheshire Hospitals NHS Foundation Trust,11,0,4,9,0,0,81.8%,0.0%,0.0%,0
+North West Commissioning Region,RW6,Pennine Acute Hospitals NHS Trust,36,0,11,31,0,6,86.1%,0.0%,54.5%,0
+North West Commissioning Region,RM3,Salford Royal NHS Foundation Trust,30,0,0,27,0,0,90.0%,0.0%,0.0%,0
+North West Commissioning Region,RVY,Southport and Ormskirk Hospital NHS Trust,11,0,1,11,0,0,100.0%,0.0%,0.0%,0
+North West Commissioning Region,RBN,St Helens and Knowsley Teaching Hospitals NHS Trust,14,0,0,14,0,0,100.0%,0.0%,0.0%,0
+North West Commissioning Region,RWJ,Stockport NHS Foundation Trust,13,0,4,6,0,2,46.2%,0.0%,50.0%,0
+North West Commissioning Region,RMP,Tameside and Glossop Integrated Care NHS Foundation Trust,9,0,1,5,0,0,55.6%,0.0%,0.0%,0
+North West Commissioning Region,RBV,The Christie NHS Foundation Trust,6,0,0,4,0,0,66.7%,0.0%,0.0%,0
+North West Commissioning Region,RET,The Walton Centre NHS Foundation Trust,20,0,0,18,0,0,90.0%,0.0%,0.0%,0
+North West Commissioning Region,RTX,University Hospitals of Morecambe Bay NHS Foundation Trust,14,0,2,12,0,0,85.7%,0.0%,0.0%,0
+North West Commissioning Region,RWW,Warrington and Halton Teaching Hospitals NHS Foundation Trust,18,0,3,16,0,1,88.9%,0.0%,33.3%,0
+North West Commissioning Region,RBL,Wirral University Teaching Hospital NHS Foundation Trust,18,0,7,17,0,2,94.4%,0.0%,28.6%,0
+North West Commissioning Region,RRF,"Wrightington, Wigan and Leigh NHS Foundation Trust",11,0,0,6,0,0,54.5%,0.0%,0.0%,0
+South East Commissioning Region,RTK,Ashford and St Peter's Hospitals NHS Foundation Trust,13,0,8,12,0,8,92.3%,0.0%,100.0%,0
+South East Commissioning Region,RXH,Brighton and Sussex University Hospitals NHS Trust,51,0,20,40,0,20,78.4%,0.0%,100.0%,0
+South East Commissioning Region,RXQ,Buckinghamshire Healthcare NHS Trust,20,0,7,16,0,7,80.0%,0.0%,100.0%,0
+South East Commissioning Region,RN7,Dartford and Gravesham NHS Trust,10,0,0,9,0,0,90.0%,0.0%,0.0%,0
+South East Commissioning Region,RVV,East Kent Hospitals University NHS Foundation Trust,30,0,7,22,0,7,73.3%,0.0%,100.0%,0
+South East Commissioning Region,RXC,East Sussex Healthcare NHS Trust,19,0,0,13,0,0,68.4%,0.0%,0.0%,0
+South East Commissioning Region,RDU,Frimley Health NHS Foundation Trust,24,0,12,21,0,5,87.5%,0.0%,41.7%,0
+South East Commissioning Region,RN5,Hampshire Hospitals NHS Foundation Trust,24,0,4,16,0,0,66.7%,0.0%,0.0%,1
+South East Commissioning Region,R1F,Isle of Wight NHS Trust,6,0,0,5,0,0,83.3%,0.0%,0.0%,0
+South East Commissioning Region,RWF,Maidstone and Tunbridge Wells NHS Trust,19,0,0,13,0,0,68.4%,0.0%,0.0%,0
+South East Commissioning Region,RPA,Medway NHS Foundation Trust,29,0,10,27,0,10,93.1%,0.0%,100.0%,0
+South East Commissioning Region,RTH,Oxford University Hospitals NHS Foundation Trust,70,17,50,51,12,33,72.9%,70.6%,66.0%,0
+South East Commissioning Region,RHU,Portsmouth Hospitals NHS Trust,17,0,21,14,0,21,82.4%,0.0%,100.0%,0
+South East Commissioning Region,RPC,Queen Victoria Hospital NHS Foundation Trust,5,0,0,0,0,0,0.0%,0.0%,0.0%,0
+South East Commissioning Region,RHW,Royal Berkshire NHS Foundation Trust,17,0,2,15,0,0,88.2%,0.0%,0.0%,0
+South East Commissioning Region,RA2,Royal Surrey County Hospital NHS Foundation Trust,21,0,4,20,0,2,95.2%,0.0%,50.0%,0
+South East Commissioning Region,RTP,Surrey and Sussex Healthcare NHS Trust,16,0,20,12,0,19,75.0%,0.0%,95.0%,0
+South East Commissioning Region,RHM,University Hospital Southampton NHS Foundation Trust,110,14,38,73,13,28,66.4%,92.9%,73.7%,1
+South East Commissioning Region,RYR,Western Sussex Hospitals NHS Foundation Trust,22,0,24,17,0,10,77.3%,0.0%,41.7%,0
+South West Commissioning Region,RBD,Dorset County Hospital NHS Foundation Trust,8,0,0,8,0,0,100.0%,0.0%,0.0%,0
+South West Commissioning Region,RTE,Gloucestershire Hospitals NHS Foundation Trust,16,0,12,13,0,8,81.3%,0.0%,66.7%,0
+South West Commissioning Region,RN3,Great Western Hospitals NHS Foundation Trust,12,0,6,10,0,3,83.3%,0.0%,50.0%,0
+South West Commissioning Region,RVJ,North Bristol NHS Trust,46,0,30,36,0,29,78.3%,0.0%,96.7%,0
+South West Commissioning Region,RBZ,Northern Devon Healthcare NHS Trust,8,0,8,4,0,2,50.0%,0.0%,25.0%,0
+South West Commissioning Region,RD3,Poole Hospital NHS Foundation Trust,11,0,4,9,0,2,81.8%,0.0%,50.0%,0
+South West Commissioning Region,REF,Royal Cornwall Hospitals NHS Trust,15,0,7,13,0,5,86.7%,0.0%,71.4%,0
+South West Commissioning Region,RH8,Royal Devon and Exeter NHS Foundation Trust,18,0,8,10,0,6,55.6%,0.0%,75.0%,0
+South West Commissioning Region,RD1,Royal United Hospitals Bath NHS Foundation Trust,13,0,7,8,0,6,61.5%,0.0%,85.7%,0
+South West Commissioning Region,RNZ,Salisbury NHS Foundation Trust,10,0,4,6,0,0,60.0%,0.0%,0.0%,0
+South West Commissioning Region,RBA,Taunton and Somerset NHS Foundation Trust,12,0,4,8,0,1,66.7%,0.0%,25.0%,0
+South West Commissioning Region,RDZ,The Royal Bournemouth and Christchurch Hospitals NHS Foundation Trust,12,0,0,10,0,0,83.3%,0.0%,0.0%,0
+South West Commissioning Region,RA9,Torbay and South Devon NHS Foundation Trust,10,0,0,5,0,0,50.0%,0.0%,0.0%,0
+South West Commissioning Region,RA7,University Hospitals Bristol NHS Foundation Trust,55,18,31,46,18,29,83.6%,100.0%,93.5%,0
+South West Commissioning Region,RK9,University Hospitals Plymouth NHS Trust,42,0,7,23,0,5,54.8%,0.0%,71.4%,0
+South West Commissioning Region,RA3,Weston Area Health NHS Trust,5,0,0,3,0,0,60.0%,0.0%,0.0%,0
+South West Commissioning Region,RA4,Yeovil District Hospital NHS Foundation Trust,10,0,0,6,0,0,60.0%,0.0%,0.0%,0
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
+,,,,,,,,,,,,
