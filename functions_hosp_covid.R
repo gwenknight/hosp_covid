@@ -5,9 +5,9 @@
 # cov_curve = changing NUMBER of patients that are covid+
 # inc_rate = ICNHT data
 
-bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays = 90){
+bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays = 90, age_data){
   
-  ## Admissions 
+  ## Admissions NEEDS TO BE BY AGE
   A <- as.data.frame(matrix(0,ndays,4))
   colnames(A) <- c("day","norm_admin","cov_admin","prop_cov")
   A[,"day"] <- seq(1,ndays,1)
@@ -17,11 +17,11 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
   A0 <- A
   
   #CRITICAL BED DAYS
-  WC <- array(0,c(nbeds,2,(ndays+1))) # Array - 3D matrix. 
-  colnames(WC)<-c("patno","status")
+  WC <- array(0,c(nbeds,3,(ndays+1))) # Array - 3D matrix. 
+  colnames(WC)<-c("patno","status","pat_age")
   #NEW BEDS NEEDED
-  WN <- array(0,c(5000,2,(ndays+1))) # Array - 3D matrix. 
-  colnames(WN)<-c("patno","status")
+  WN <- array(0,c(5000,3,(ndays+1))) # Array - 3D matrix. 
+  colnames(WN)<-c("patno","status","pat_age")
   # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
   
   # track number of patients 
@@ -31,8 +31,10 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
   ### ICU BEDS ###
   ###############**********************************************************************
   
-  ICU_fill <- as.data.frame(matrix(0,ndays,3)) # Want to know how many enter the ICU each day
-  colnames(ICU_fill) <- c("day","norm","cov")
+  # Want to know how many enter the ICU each day
+  # And how many discharge / deaths
+  ICU_fill <- as.data.frame(matrix(0,9*ndays,5)) # 9 AGE groups
+  colnames(ICU_fill) <- c("day","norm","cov","discharge","death") # FIXED COLUMN ORDER
   ICU_fill$day <- seq(1,ndays,1)
   
   # fill by bed
@@ -42,6 +44,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
     
     # first patient in bed
     pat_num <- pat_num + 1
+    pat_age <- sample(seq(1,9,1),prob=age_data$prop,1) # sample from region population atm - could be differs for ICU
     if(runif(1) < 0.2){ # 20% empty beds
       pat_status <- 3 # Empty bed
       los <- 1 # check next day for patient
@@ -51,10 +54,13 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
       ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
     }
     
-    WC[i,c("patno","status"),1:los] <- c(pat_num,pat_status)
+    WC[i,c("patno","status","pat_age"),1:los] <- c(pat_num,pat_status,pat_age)
+    pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+    ICU_fill[1,(pat_outcome+4)] <- ICU_fill[1,(pat_outcome+4)] + 1
     
     cumlos <- cumlos + los
     
+    # FILL BEDS
     while(cumlos < (ndays+1)){
       #print(cumlos)
       pat_num <- pat_num + 1 # Next patient
@@ -62,6 +68,8 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
         #print(c(cumlos,pat_status))
         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+        if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
+        if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
         
         if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
           
@@ -70,8 +78,10 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
           
           los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                sample(los_cov, 1), #rnorm(1,los_cov), 
                                 rnorm(1,los_norm))) # length of stay
+          
+          
           
         }else{
           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
@@ -96,12 +106,15 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
       
       # If empty bed don't store patient number 
       if(pat_status == 3){
-        WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays)] <- c(0,pat_status) # this patient stays until end of los
+        WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays)] <- c(0,pat_status,0) # this patient stays until end of los
       }else{
-        WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays)] <- c(pat_num,pat_status) # this patient stays until end of los
+        WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays)] <- c(pat_num,pat_status,pat_age) # this patient stays until end of los
       }
       
       cumlos <- cumlos + los # next new patient at this time point
+      # Patient outcome
+      pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+      ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
     }
     
   }
@@ -118,12 +131,15 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
     while(cumlos < (ndays + 1)){
       #print(c("1",cumlos, pat_num,pat_status))
       pat_num <- pat_num + 1 # Next patient
+      
       #  print(c("2",cumlos, pat_num,pat_status))
       ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
         #print(c(cumlos,pat_status))
         
         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+        if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
+        if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
         
         if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted on that day
           
@@ -159,6 +175,10 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays =
       }
       
       cumlos <- cumlos + los # next new patient at this time point
+      # Patient outcome
+      pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+      ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+      
       # print(c("4",cumlos, pat_num,pat_status))
     }
     i = i + 1 # move on to next bed
@@ -310,7 +330,7 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
   n <- n[ww,]
   
   ymax = ifelse(mm > 500,5000,250)
-    
+  
   g <- ggplot(n, aes(x = time, y = bedno) ) + 
     geom_point(aes(col = factor(status))) + 
     scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","COVID")) + 
