@@ -22,3 +22,4 @@ saveRDS(delays, "delay_dist_linelist.rds")
 sample(delays, 10, replace = TRUE)
 
 h <- hist(delays)
+Gamma(0.8620528943394684, 6.4821837628800365)

@@ -77,7 +77,7 @@ write.csv(M_wuhc$bed_store,"outputs/wuh_cuh.csv")
 
 # EG
 norm_curve <- rnorm(ndays,16.3,1)
-output_wuh <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve, ndays=90, age_data)
+output_wuh <- bed_filling(nbeds, los_norm, los_cov, cov_curve,norm_curve, ndays=90)
 plot_eg(output_wuh, "wuh_ichnt", norm_curve, cov_curve)
 
 norm_curve <- rnorm(ndays,1,1)

@@ -127,24 +127,7 @@ output_slcuh <- bed_filling(64, los_norm, los_cov, cov_curve,norm_curve,ndays=90
 
 ####
 
-extrabed_plot <- function(outputnn){
-  # n <- melt(outputnn$WN,id.vars = "patno")
-  # colnames(n) <- c("bedno","variable","time","value")
-  # n <- dcast(n, time + bedno ~variable)
-  # n <- n[-which(n$time == (ndays+1)),]
-  # 
-  # ll <- n %>% group_by(bedno) %>% summarise(mean(patno)) # which beds actually have patients in
-  # mm <- max(which(ll[,2]>0,arr.ind = TRUE)) # max bed number
-  # ww <- which(n$bedno <= mm)
-  # n <- n[ww,]
-  # 
-  # g <- ggplot(n, aes(x = time, y = bedno) ) + 
-  #   geom_point(aes(col = factor(status))) + 
-  #   scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","Covid")) + 
-  #   xlab("Day") + ylab("Bed number") + scale_y_continuous(lim=c(0,400)) +
-  #   annotate(size = 2,'text',10, 15, 
-  #            label=paste("Extra beds needed:",mm)) +
-  #   geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
+extrabed_plot <- function(outputnn, ){
   
   Mm <- outputnn
   w<-which(Mm$status != 3)
@@ -155,6 +138,7 @@ extrabed_plot <- function(outputnn){
     scale_y_continuous("Number of beds needed") + 
     scale_color_continuous(guide=FALSE) + 
     scale_x_continuous("Days")
+  
 }
 
 ####
