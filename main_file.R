@@ -45,7 +45,7 @@ los_norm <- c(7.9,4) # ICHNT ICU NORMAL LOS
 
 los_cov <- readRDS("delay_dist_linelist.rds") #sample(seq(1,length(x),1), size = n, prob = x, replace=T) #c(10,8) # GUESS 
 
-cols <- c("3" = "lightblue", "1" = "red", "0" = "darkgreen")
+
 
 nruns = 100
 
