@@ -53,6 +53,8 @@ dev.off()
 ### HIGH
 cov_curve_high <- exp(0.18*seq(1,ndays,1))
 plot(cov_curve_high)
+lines((1+0.18)^(seq(1,ndays,1)))
+
 norm_curve_uclh_half <- seq(1,0.5,length.out = length(cov_curve_low))*inc_rate_uclh
 
 M_high <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
@@ -177,10 +179,6 @@ write.csv(results_tab,"outputs/table_results_UCLH.csv")
 
 
 
-
-
-##### How many cases to NOT BREAK NHS
-# Could do 
 
 
 
