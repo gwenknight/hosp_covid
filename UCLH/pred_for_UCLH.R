@@ -11,6 +11,17 @@ library(fitdistrplus)
 source("functions_uclh_covid.R")
 
 
+#### CHESS
+chess_latest <- readRDS("chess_time_series_latest.rds")
+w<-which(chess_latest$nhs_region == "london")
+w1 <- which(chess_latest$type_case == "covid19")
+chess_london <- chess_latest[intersect(w,w1),] %>% ungroup() %>% 
+  group_by(date_admission) %>% summarise(total = sum(admissions))
+ggplot(chess_london,aes(x=date_admission, y = total)) + geom_point()
+y <- fitdist(chess_london$total, distr = "exp", method = "mle")
+plot(seq(1,4,1),chess_london$total)
+lines(seq(1,4,1),20 + exp(0.8*seq(1,4,1)))
+
 ####****************************************************************************************************************
 ####****************************************************************************************************************
 ####****************************************************************************************************************

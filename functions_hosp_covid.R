@@ -46,14 +46,18 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
       # first patient in bed
       pat_num <- pat_num + 1
       pat_status <- 0 # normal patient in initially - assume v low prevalence of COVID
-      los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
+      if(length(los_norm)==2){
+        los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
+      }else{
+        los <- ceiling(runif(1) * rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))# GAMMA 
+      }
       ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
     }else{
       pat_status <- 3 # Empty bed
       los <- 1 # check next day for patient
     }
     
-    WC[i,c("patno","status"),1:los] <- c(pat_num,pat_status)
+    WC[i,c("patno","status"),pmin(1:los, ndays_i)] <- c(pat_num,pat_status)
     
     cumlos <- cumlos + los
     
@@ -71,9 +75,16 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
           
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
+          if(length(los_norm)==2){
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rnorm(1,los_norm))) # length of stay  
+          }else{
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+          }
+          
           
         }else{
           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
@@ -85,9 +96,15 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
                                          A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
           
           
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
+          if(length(los_norm)==2){
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rnorm(1,los_norm))) # length of stay  
+          }else{
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+          }
           
         }
       }else{
@@ -142,9 +159,15 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
                                          A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
+          if(length(los_norm)==2){
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rnorm(1,los_norm))) # length of stay  
+          }else{
+            los <- ceiling(ifelse(pat_status == 1, 
+                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+          }
         }
       }else{
         los <- 1
@@ -541,7 +564,6 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     if(length(inc_rate == 1)){norm_curve <- rnorm(ndays_i,inc_rate,1)
     }else{norm_curve <- inc_rate}
     
-    
     output <- bed_filling(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 14)
     
     h <- melt(output$WC,id.vars = "patno")
@@ -568,9 +590,9 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     }else{bed_store <- rbind(bed_store, cbind(j,n))}
     
     
-    max_bed_need <- c(max_bed_need,mm)
-    miss_norm <- c(miss_norm, sum(output$Aleft[,c("norm_admin")]))
-    miss_covi <- c(miss_covi, sum(output$Aleft[,c("cov_admin")]))
+    max_bed_need <- c(max_bed_need,mm) # This value is the number of beds
+    miss_norm <- c(miss_norm, sum(output$Aleft[,c("norm_admin")])) # This value is the number of patients
+    miss_covi <- c(miss_covi, sum(output$Aleft[,c("cov_admin")])) 
   }
   
   ## Multiple runs
@@ -583,8 +605,8 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
   # mean number missed per day
   #missing_store$month <- rep(1:(ndays_i/30),each = 30)
   #miss_month <- missing_store %>% group_by(month) %>% 
-    #summarise(m_norm = mean(norm_admin), m_cov = mean(cov_admin), 
-   #           sd_norm = sd(norm_admin), sd_cov = sd(cov_admin)) 
+  #summarise(m_norm = mean(norm_admin), m_cov = mean(cov_admin), 
+  #           sd_norm = sd(norm_admin), sd_cov = sd(cov_admin)) 
   
   # mean total missed
   total_missed <- c(mean(miss_norm), sd(miss_norm), 
@@ -633,7 +655,7 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
     geom_point(aes(col = factor(status))) + 
     scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","COVID")) + 
     xlab("Day") + ylab("Bed number") #+
-    #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
+  #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
   
   pcov <- as.data.frame(cbind(seq(1,length(cov_curve),1),cov_curve));
   colnames(pcov)<-c("days","cprev")
@@ -663,7 +685,7 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
              label=paste("Total missed norm:",sum(output$Aleft[,c("norm_admin")]))) +
     annotate(size = 2,'text',10, 15, 
              label=paste("Total missed covid:",sum(output$Aleft[,c("cov_admin")])))# +
-    #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
+  #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
   
   
   p2/p1+p3
@@ -680,7 +702,7 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
   ww <- which(n$bedno <= mm)
   n <- n[ww,]
   
-  ymax = ifelse(mm > 500,5000,250)
+  ymax = ifelse(mm > 500,1000,50)
   
   g <- ggplot(n, aes(x = time, y = bedno) ) + 
     geom_point(aes(col = factor(status))) + 
@@ -689,9 +711,12 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
     scale_y_continuous(lim=c(0,ymax)) +
     annotate(size = 2,'text',10, 15, 
              label=paste("Extra beds needed:",mm)) #+
-    #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
+  #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
   
   ggsave(paste0("plots/extra_beds_",name,".pdf"))
+
+  (p2+p1)/(p3+g)
+  ggsave(paste0("plots/eg_square_",name,".pdf"))
   
 }
 
@@ -704,18 +729,18 @@ plot_multiple <- function(M,name){
   p11 <- ggplot(miss, aes(x=day, y = m_norm)) + 
     geom_ribbon(aes(ymin = m_norm - sd_norm, ymax = m_norm + sd_norm), fill = "grey70") +
     geom_line(aes(y = m_norm)) + ggtitle(name)
-    #annotate(size = 2,'text',(15 + 30*c(0,1,2)), -1, 
-    #         label=paste("Av. miss. norm:",round(miss_month$m_norm,0))) + 
-    #annotate(size = 2,'text',(15 + 30*c(0,1,2)), -2, 
-    #         label=paste("Av. miss. covid:",round(miss_month$m_cov,0))) +
-    #annotate(size = 2,'text',30, 12, 
-    #         label=paste("Extra beds needed:",round(mean(M$max_bed_need),0),
-    #                     "SD (",round(sd(M$max_bed_need),0),")")) + 
-    #
+  #annotate(size = 2,'text',(15 + 30*c(0,1,2)), -1, 
+  #         label=paste("Av. miss. norm:",round(miss_month$m_norm,0))) + 
+  #annotate(size = 2,'text',(15 + 30*c(0,1,2)), -2, 
+  #         label=paste("Av. miss. covid:",round(miss_month$m_cov,0))) +
+  #annotate(size = 2,'text',30, 12, 
+  #         label=paste("Extra beds needed:",round(mean(M$max_bed_need),0),
+  #                     "SD (",round(sd(M$max_bed_need),0),")")) + 
+  #
   
   ggsave(paste0("plots/miss_",name,".pdf"))
   
- # stm <- cbind(seq(1,3,1),cbind(round(miss_month$m_norm,0),round(miss_month$m_cov,0)))
+  # stm <- cbind(seq(1,3,1),cbind(round(miss_month$m_norm,0),round(miss_month$m_cov,0)))
   #write.csv(stm, paste0("outputs/",name,"_missedpermonth.csv"))
   
   write.csv(c(round(mean(M$max_bed_need),0),round(sd(M$max_bed_need),0)),paste0("outputs/",name,"_extrabed.csv"))
@@ -728,7 +753,7 @@ plot_multiple <- function(M,name){
     scale_x_continuous("Days") + 
     ggtitle(name) + 
     geom_hline(yintercept = nbeds, col = "red")
-
+  
   ggsave(paste0("plots/bed_need_overtime_",name,".pdf"))
 }
 
