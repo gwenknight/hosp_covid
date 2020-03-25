@@ -575,6 +575,7 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
   max_bed_need <- c()
   miss_norm <- c()
   miss_covi <- c()
+  outcomes_store <- c()
   
   for(j in 1:nruns){
     if(length(inc_rate == 1)){norm_curve <- rnorm(ndays_i,inc_rate,1)
@@ -609,6 +610,8 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     max_bed_need <- c(max_bed_need,mm) # This value is the number of beds
     miss_norm <- c(miss_norm, sum(output$Aleft[,c("norm_admin")])) # This value is the number of patients
     miss_covi <- c(miss_covi, sum(output$Aleft[,c("cov_admin")])) 
+    
+    outcomes_store <- rbind(outcomes_store, cbind(j,output$ICU_fill[,c("day","death","discharge")]))
   }
   
   ## Multiple runs
@@ -638,11 +641,19 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
   total_beds_mn <- total_beds %>% group_by(j, bedno) %>% slice(which.min(time)) # time need bed
   total_beds_time <- total_beds_mn %>% group_by(time) %>% summarize(mbed = mean(bedno,na.rm = TRUE), sdbed = sd(bedno,na.rm = TRUE))
   
+  ## outcomes
+  outcomes_store<-as.data.frame(outcomes_store)
+  colnames(outcomes_store) <- c("run","day","death","discharge")
+  outcomes_smr <- outcomes_store %>% group_by(day) %>% 
+    summarize(mdeaths = mean(death,na.rm = TRUE), sddeath = sd(death,na.rm = TRUE),
+              mdischarge = mean(discharge,na.rm = TRUE), sddischarge = sd(discharge,na.rm = TRUE))
+  
+  
   return(list(missing_store = missing_store,# miss_month = miss_month,
               h_store = h_store, miss = miss,
               bed_store = bed_store, max_bed_need = max_bed_need,
               total_missed = total_missed, 
-              total_beds_time = total_beds_time))
+              total_beds_time = total_beds_time, outcomes_smr = outcomes_smr))
   
 }
 
@@ -734,6 +745,12 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
   (p2+p1)/(p3+g)
   ggsave(paste0("plots/eg_square_",name,".pdf"))
   
+  ### DEATHS/DISCHARGE
+  outcomes <- melt(output$ICU_fill[,c("day","death","discharge")], id.vars = "day")
+  g2 <- ggplot(outcomes, aes(x=day,y=value)) + geom_line(aes(group = variable, colour = variable)) +
+    scale_x_continuous("Day") + 
+    scale_y_continuous("Number") 
+  ggsave(paste0("plots/eg_outcomes_",name,".pdf"))
 }
 
 plot_multiple <- function(M,name){
@@ -771,6 +788,24 @@ plot_multiple <- function(M,name){
     geom_hline(yintercept = nbeds, col = "red")
   
   ggsave(paste0("plots/bed_need_overtime_",name,".pdf"))
+  
+  ### DEATHS/DISCHARGE
+  outcomes <- M$outcomes_smr
+  p33 <- ggplot(outcomes, aes(x=day,y=mdeaths)) + geom_ribbon(aes(ymin = mdeaths - sddeath, ymax = mdeaths + sddeath), fill = "red", alpha = 0.5) + 
+    geom_line(aes(y=mdeaths)) + 
+    geom_ribbon(aes(ymin=mdischarge-sddischarge, ymax = mdischarge + sddischarge),fill = "blue", alpha = 0.5) + 
+    geom_line(aes(y=mdischarge)) + 
+    scale_y_continuous("Count per day") + 
+    scale_x_continuous("Day") + 
+    scale_fill_manual(values = c("red","blue"),labels = c("Discharge","Death"))
+  ggsave(paste0("plots/outcomes_",name,".pdf"))
+  
+  
+  # outcomes <- melt(output$ICU_fill[,c("day","death","discharge")], id.vars = "day")
+  # g2 <- ggplot(outcomes, aes(x=day,y=value)) + geom_line(aes(group = variable, colour = variable)) +
+  #   scale_x_continuous("Day") + 
+  #   scale_y_continuous("Number") 
+  # ggsave(paste0("plots/eg_outcomes_",name,".pdf"))
 }
 
 

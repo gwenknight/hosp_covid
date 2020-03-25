@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+xlsx
+
+/writeup
+/data
+/outputs
+/plots
+/meetings
+
+delay_dist_linelist.rds
+
+hosp_covid.Rproj
