@@ -33,11 +33,15 @@ cols <- c("3" = "lightblue", "1" = "red", "0" = "darkgreen")
 
 nruns = 100
 
-ndays = 14 # run for 2 weeks
+ndays = 17 # run for 2 weeks
 
 nbeds_uclh <- 61
 occ_bed_days_uclh <- 0.754 * nbeds_uclh # occupied beds
 inc_rate_uclh    <- ceiling(occ_bed_days_uclh / 8.6)
+
+pdischarge <- c()
+pdischarge$covid <- 0.5
+pdischarge$normal <- 1-0.083 # 8.3 die from HES
 
 #### PLOTS of inputs
 los_norm_icu_examples <- rgamma(10000, fit.gamma$estimate["shape"], fit.gamma$estimate["rate"])
@@ -51,49 +55,48 @@ dev.off()
 ####****************************************************************************************************************
 ####****************************************************************************************************************
 ### HIGH
-cov_curve_high <- exp(0.18*seq(1,ndays,1))
+cov_curve_high <- c(rep(0,3),exp(0.18*seq(1,14,1)))
 plot(cov_curve_high)
-lines((1+0.18)^(seq(1,ndays,1)))
 
-norm_curve_uclh_half <- seq(1,0.5,length.out = length(cov_curve_low))*inc_rate_uclh
+norm_curve_uclh_half <- c(rep(inc_rate_uclh,3),seq(1,0.5,length.out = 14)*inc_rate_uclh) # flat then covid
 
 M_high <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
-                       cov_curve_high, ndays, inc_rate = norm_curve_uclh_half)
+                       cov_curve_high, ndays, inc_rate = norm_curve_uclh_half,pdischarge)
 
 plot_multiple(M_high,paste0("UCLH_high"))
 
 # e.g. 
 #norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_high,norm_curve_uclh_half,ndays=14)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_high,norm_curve_uclh_half,ndays=17,pdischarge)
 plot_eg(output_eg, paste0("UCLH_high"),norm_curve_uclh_half, cov_curve_high)
 
 
 ### LOW
-cov_curve_low <- exp(0.02*seq(1,ndays,1))
+cov_curve_low <- c(rep(0,3),exp(0.02*seq(1,14,1)))
 plot(cov_curve_low)
 
 M_low <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
-                       cov_curve_low, ndays, inc_rate = norm_curve_uclh_half)
+                       cov_curve_low, ndays, inc_rate = norm_curve_uclh_half,pdischarge)
 
 plot_multiple(M_low,paste0("UCLH_low"))
 
 # e.g. 
 norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_low,norm_curve_uclh_half,ndays=14)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_low,norm_curve_uclh_half,ndays=17,pdischarge)
 plot_eg(output_eg, paste0("UCLH_low"),norm_curve_uclh_half, cov_curve_low)
 
 ### MEDIUM
-cov_curve_med <- exp(0.1*seq(1,ndays,1))
+cov_curve_med <- c(rep(0,3),exp(0.1*seq(1,14,1)))
 plot(cov_curve_med)
 
 M_med <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
-                       cov_curve_med, ndays, inc_rate = norm_curve_uclh_half)
+                       cov_curve_med, ndays, inc_rate = norm_curve_uclh_half,pdischarge)
 
 plot_multiple(M_med,paste0("UCLH_med"))
 
 # e.g. 
 norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_med,norm_curve_uclh_half,ndays=14)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_med,norm_curve_uclh_half,ndays=17,pdischarge)
 plot_eg(output_eg, paste0("UCLH_med"),norm_curve_uclh_half, cov_curve_med)
 
 
@@ -133,7 +136,7 @@ ggplot(M_all,aes(x=time, y = mean.need, group = variable)) +
   geom_line(aes(y = mean.need)) + 
   scale_fill_discrete("Scenario") + 
   scale_y_continuous("Number of beds needed") + 
-  scale_x_continuous("Days") + 
+  scale_x_continuous("Days",lim = c(3,17)) + 
   geom_hline(yintercept = nbeds, col = "red",lty = "dashed") + theme_bw()
 
 ggsave(paste0("plots/bed_need_overtime_","UCLH",".pdf"))

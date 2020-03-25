@@ -5,7 +5,7 @@
 # cov_curve = changing NUMBER of patients that are covid+
 # inc_rate = ICNHT data
 
-bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 14){
+bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17, pdischarge){
   
   ## Admissions 
   A <- as.data.frame(matrix(0,ndays_i,4))
@@ -31,8 +31,10 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
   ### ICU BEDS ###
   ###############**********************************************************************
   
-  ICU_fill <- as.data.frame(matrix(0,ndays_i,3)) # Want to know how many enter the ICU each day
-  colnames(ICU_fill) <- c("day","norm","cov")
+  # Want to know how many in the ICU per day
+  # And how many discharge / deaths
+  ICU_fill <- as.data.frame(matrix(0,ndays_i,5)) # 9 AGE groups
+  colnames(ICU_fill) <- c("day","norm","cov","discharge","death") # FIXED COLUMN ORDER
   ICU_fill$day <- seq(1,ndays_i,1)
   
   # fill by bed
@@ -60,54 +62,55 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
     WC[i,c("patno","status"),pmin(1:los, ndays_i)] <- c(pat_num,pat_status)
     
     cumlos <- cumlos + los
+    # Patient outcome
+    if(cumlos <= ndays_i){
+      pat_outcome <- ifelse(runif(1) < ifelse(pat_status == 0, pdischarge$covid, pdischarge$normal), 0, 1) # 1 = death 
+      ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+    }
     
+    # For this bed, whilst we still have days left to fill
     while(cumlos < (ndays_i+1)){
-      #print(cumlos)
+      
       pat_num <- pat_num + 1 # Next patient
-      ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
+      
+      ### NEED TO HAVE PATIENTS TO ADMIT
       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
+        
+        # First come first served - so randomly pick. BUT if none of this type then switch status (below)
         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
         
+        # If normal - count them as appearing / remove from admin / regen proportion covid / generate their los
         if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
           
           ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0) # update proportion covid
           
+          # Different possible inputs for los: normal distibution if 2 para, gamma if 3
           if(length(los_norm)==2){
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rnorm(1,los_norm))) # length of stay  
+            los <- ceiling(ifelse(pat_status == 1,sample(los_cov, 1, replace = TRUE),rnorm(1,los_norm))) # NORM  
           }else{
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE),rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
           }
           
           
-        }else{
+        }else{ # If none of first picked status then
           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
           # don't need to check if patient of this type as know sum (A) > 0
           
           ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
-                                         A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
           
-          
+          # LOS for this patient
           if(length(los_norm)==2){
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rnorm(1,los_norm))) # length of stay  
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE),rnorm(1,los_norm))) # length of stay  
           }else{
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE), rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
           }
           
         }
-      }else{
+      }else{ # If not patient then skip this day 
         los <- 1
         pat_status <- 3 # EMPTY BED
         pat_num <- pat_num - 1 # No patient
@@ -116,31 +119,37 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
       # If empty bed don't store patient number 
       if(pat_status == 3){
         WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
-      }else{
+      }else{ # Store patient
         WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
       }
       
       cumlos <- cumlos + los # next new patient at this time point
+      # AND patient outcome
+      if(pat_status != 3){
+        if(cumlos <= ndays_i){
+          pat_outcome <- ifelse(runif(1) < ifelse(pat_status == 0, pdischarge$covid, pdischarge$normal), 0, 1) # 1 = death 
+          ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+        }
+      }
+      
     }
     
   }
   Aleft <- A
-  
   i = 1
-  #print(pat_num)
+  
   # Extra beds needed
   while( sum(A$norm_admin + A$cov_admin) > 0){
     
     cumlos <- 1
-    WN[i,c("patno","status"),1] <- c(pat_num+1,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
+    WN[i,c("patno","status"),1] <- c(0,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
     
     while(cumlos < (ndays_i + 1)){
-      #print(c("1",cumlos, pat_num,pat_status))
+      
       pat_num <- pat_num + 1 # Next patient
-      #  print(c("2",cumlos, pat_num,pat_status))
+      
       ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
         
         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
         
@@ -148,9 +157,13 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
           
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
+          
+          # LOS for this patient
+          if(length(los_norm)==2){
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE),rnorm(1,los_norm))) # length of stay  
+          }else{
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE), rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+          }
           
         }else{
           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
@@ -159,14 +172,12 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
                                          A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+          
+          # LOS for this patient
           if(length(los_norm)==2){
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rnorm(1,los_norm))) # length of stay  
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE),rnorm(1,los_norm))) # length of stay  
           }else{
-            los <- ceiling(ifelse(pat_status == 1, 
-                                  sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                  rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
+            los <- ceiling(ifelse(pat_status == 1, sample(los_cov, 1, replace = TRUE), rgamma(1,shape = los_norm["shape"], rate = los_norm["rate"]))) # GAMMA
           }
         }
       }else{
@@ -174,7 +185,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
         pat_status <- 3 # EMPTY BED
         pat_num <- pat_num - 1 # No patient
       }
-      # print(c("3",cumlos, pat_num,pat_status))
+      
       # If empty bed don't store patient number 
       if(pat_status == 3){
         WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
@@ -183,375 +194,380 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
       }
       
       cumlos <- cumlos + los # next new patient at this time point
-      # print(c("4",cumlos, pat_num,pat_status))
+      # AND patient outcome
+      if(pat_status != 3){
+        if(cumlos <= ndays_i){
+          pat_outcome <- ifelse(runif(1) < ifelse(pat_status == 0, pdischarge$covid, pdischarge$normal), 0, 1) # 1 = death 
+          ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+        }
+      }
     }
     i = i + 1 # move on to next bed
     
   }
-  
   
   return(list(A0 = A0, A = A, Aleft = Aleft, WC = WC, WN = WN, pat_num = pat_num, ICU_fill = ICU_fill))
   
 }
 
-bed_filling_uclh <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 14){
-  
-  ## Admissions 
-  A <- as.data.frame(matrix(0,ndays_i,4))
-  colnames(A) <- c("day","norm_admin","cov_admin","prop_cov")
-  A[,"day"] <- seq(1,ndays_i,1)
-  A[,"norm_admin"] <- ceiling(norm_curve) #ceiling(rnorm(ndays_i,inc_rate,1)) #  depends on normal number of bed days / LOS of hospital
-  A[,"cov_admin"] <- ceiling(cov_curve)
-  A[,"prop_cov"] <- A$cov_admin/(A$norm_admin + A$cov_admin)
-  A0 <- A
-  
-  #CRITICAL BED DAYS
-  WC <- array(0,c(nbeds,2,(ndays_i+1))) # Array - 3D matrix. 
-  colnames(WC)<-c("patno","status")
-  #NEW BEDS NEEDED
-  WN <- array(0,c(1000,2,(ndays_i+1))) # Array - 3D matrix. 
-  colnames(WN)<-c("patno","status")
-  # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
-  
-  # track number of patients 
-  pat_num <- 0
-  
-  ###############**********************************************************************
-  ### ICU BEDS ###
-  ###############**********************************************************************
-  
-  ICU_fill <- as.data.frame(matrix(0,ndays_i,3)) # Want to know how many enter the ICU each day
-  colnames(ICU_fill) <- c("day","norm","cov")
-  ICU_fill$day <- seq(1,ndays_i,1)
-  
-  # fill by bed
-  for(i in 1:nbeds){
-    
-    cumlos <- 0 # DAY ZERO
-    
-    # To fill beds from bottom up
-    initial_fill <- ceiling(nbeds * (0.7 + runif(1)*0.2)) # Between 70-90% capacity
-    if(i < initial_fill){
-      # first patient in bed
-      pat_num <- pat_num + 1
-      pat_status <- 0 # normal patient in initially - assume v low prevalence of COVID
-      los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
-      ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
-    }else{
-      pat_status <- 3 # Empty bed
-      los <- 1 # check next day for patient
-    }
-    
-    WC[i,c("patno","status"),1:los] <- c(pat_num,pat_status)
-    
-    cumlos <- cumlos + los
-    
-    while(cumlos < (ndays_i+1)){
-      #print(cumlos)
-      pat_num <- pat_num + 1 # Next patient
-      ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
-      if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
-        pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
-        
-        if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
-          
-          ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-        }else{
-          pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
-          # don't need to check if patient of this type as know sum (A) > 0
-          
-          ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
-                                         A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          
-          
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-        }
-      }else{
-        los <- 1
-        pat_status <- 3 # EMPTY BED
-        pat_num <- pat_num - 1 # No patient
-      }
-      
-      # If empty bed don't store patient number 
-      if(pat_status == 3){
-        WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
-      }else{
-        WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
-      }
-      
-      cumlos <- cumlos + los # next new patient at this time point
-    }
-    
-  }
-  Aleft <- A
-  
-  i = 1
-  #print(pat_num)
-  # Extra beds needed
-  while( sum(A$norm_admin + A$cov_admin) > 0){
-    
-    cumlos <- 1
-    WN[i,c("patno","status"),1] <- c(pat_num+1,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
-    
-    while(cumlos < (ndays_i + 1)){
-      #print(c("1",cumlos, pat_num,pat_status))
-      pat_num <- pat_num + 1 # Next patient
-      #  print(c("2",cumlos, pat_num,pat_status))
-      ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
-      if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
-        
-        pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
-        
-        if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted on that day
-          
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-        }else{
-          pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
-          # don't need to check if patient of this type as know sum (A) > 0
-          
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
-                                         A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-        }
-      }else{
-        los <- 1
-        pat_status <- 3 # EMPTY BED
-        pat_num <- pat_num - 1 # No patient
-      }
-      # print(c("3",cumlos, pat_num,pat_status))
-      # If empty bed don't store patient number 
-      if(pat_status == 3){
-        WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
-      }else{
-        WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
-      }
-      
-      cumlos <- cumlos + los # next new patient at this time point
-      # print(c("4",cumlos, pat_num,pat_status))
-    }
-    i = i + 1 # move on to next bed
-    
-  }
-  
-  
-  return(list(A0 = A0, A = A, Aleft = Aleft, WC = WC, WN = WN, pat_num = pat_num, ICU_fill = ICU_fill))
-  
-}
+# #bed_filling_uclh <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17){
+# 
+# ## Admissions 
+# A <- as.data.frame(matrix(0,ndays_i,4))
+# colnames(A) <- c("day","norm_admin","cov_admin","prop_cov")
+# A[,"day"] <- seq(1,ndays_i,1)
+# A[,"norm_admin"] <- ceiling(norm_curve) #ceiling(rnorm(ndays_i,inc_rate,1)) #  depends on normal number of bed days / LOS of hospital
+# A[,"cov_admin"] <- ceiling(cov_curve)
+# A[,"prop_cov"] <- A$cov_admin/(A$norm_admin + A$cov_admin)
+# A0 <- A
+# 
+# #CRITICAL BED DAYS
+# WC <- array(0,c(nbeds,2,(ndays_i+1))) # Array - 3D matrix. 
+# colnames(WC)<-c("patno","status")
+# #NEW BEDS NEEDED
+# WN <- array(0,c(1000,2,(ndays_i+1))) # Array - 3D matrix. 
+# colnames(WN)<-c("patno","status")
+# # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
+# 
+# # track number of patients 
+# pat_num <- 0
+# 
+# ###############**********************************************************************
+# ### ICU BEDS ###
+# ###############**********************************************************************
+# 
+# ICU_fill <- as.data.frame(matrix(0,ndays_i,3)) # Want to know how many enter the ICU each day
+# colnames(ICU_fill) <- c("day","norm","cov")
+# ICU_fill$day <- seq(1,ndays_i,1)
+# 
+# # fill by bed
+# for(i in 1:nbeds){
+#   
+#   cumlos <- 0 # DAY ZERO
+#   
+#   # To fill beds from bottom up
+#   initial_fill <- ceiling(nbeds * (0.7 + runif(1)*0.2)) # Between 70-90% capacity
+#   if(i < initial_fill){
+#     # first patient in bed
+#     pat_num <- pat_num + 1
+#     pat_status <- 0 # normal patient in initially - assume v low prevalence of COVID
+#     los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
+#     ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
+#   }else{
+#     pat_status <- 3 # Empty bed
+#     los <- 1 # check next day for patient
+#   }
+#   
+#   WC[i,c("patno","status"),1:los] <- c(pat_num,pat_status)
+#   
+#   cumlos <- cumlos + los
+#   
+#   while(cumlos < (ndays_i+1)){
+#     #print(cumlos)
+#     pat_num <- pat_num + 1 # Next patient
+#     ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
+#     if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
+#       #print(c(cumlos,pat_status))
+#       pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+#       
+#       if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
+#         
+#         ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
+#         A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#         A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#         
+#         los <- ceiling(ifelse(pat_status == 1, 
+#                               sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+#                               rnorm(1,los_norm))) # length of stay
+#         
+#       }else{
+#         pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
+#         # don't need to check if patient of this type as know sum (A) > 0
+#         
+#         ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
+#         A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#         A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
+#                                        A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#         
+#         
+#         los <- ceiling(ifelse(pat_status == 1, 
+#                               sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
+#                               rnorm(1,los_norm))) # length of stay
+#         
+#       }
+#     }else{
+#       los <- 1
+#       pat_status <- 3 # EMPTY BED
+#       pat_num <- pat_num - 1 # No patient
+#     }
+#     
+#     # If empty bed don't store patient number 
+#     if(pat_status == 3){
+#       WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
+#     }else{
+#       WC[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
+#     }
+#     
+#     cumlos <- cumlos + los # next new patient at this time point
+#   }
+#   
+# }
+# Aleft <- A
+# 
+# i = 1
+# #print(pat_num)
+# # Extra beds needed
+# while( sum(A$norm_admin + A$cov_admin) > 0){
+#   
+#   cumlos <- 1
+#   WN[i,c("patno","status"),1] <- c(pat_num+1,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
+#   
+#   while(cumlos < (ndays_i + 1)){
+#     #print(c("1",cumlos, pat_num,pat_status))
+#     pat_num <- pat_num + 1 # Next patient
+#     #  print(c("2",cumlos, pat_num,pat_status))
+#     ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
+#     if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
+#       #print(c(cumlos,pat_status))
+#       
+#       pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+#       
+#       if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted on that day
+#         
+#         A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#         A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#         los <- ceiling(ifelse(pat_status == 1, 
+#                               sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+#                               rnorm(1,los_norm))) # length of stay
+#         
+#       }else{
+#         pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
+#         # don't need to check if patient of this type as know sum (A) > 0
+#         
+#         A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#         A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
+#                                        A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#         los <- ceiling(ifelse(pat_status == 1, 
+#                               sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
+#                               rnorm(1,los_norm))) # length of stay
+#       }
+#     }else{
+#       los <- 1
+#       pat_status <- 3 # EMPTY BED
+#       pat_num <- pat_num - 1 # No patient
+#     }
+#     # print(c("3",cumlos, pat_num,pat_status))
+#     # If empty bed don't store patient number 
+#     if(pat_status == 3){
+#       WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
+#     }else{
+#       WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
+#     }
+#     
+#     cumlos <- cumlos + los # next new patient at this time point
+#     # print(c("4",cumlos, pat_num,pat_status))
+#   }
+#   i = i + 1 # move on to next bed
+#   
+# }
+# 
+# 
+# return(list(A0 = A0, A = A, Aleft = Aleft, WC = WC, WN = WN, pat_num = pat_num, ICU_fill = ICU_fill))
+# 
+# }
 
-bed_filling_age <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 90, age_data){
-  
-  ## Admissions 
-  An <- as.data.frame(matrix(0,ndays_i,4)) # NORMAL
-  Ac <- as.data.frame(matrix(0,ndays_i,4)) # COVID
-  colnames(An) <- c("day",seq(1,9,1)) # day then ages
-  colnames(An) <- c("day",seq(1,9,1)) # day then ages
-  
-  
-  A[,"day"] <- seq(1,ndays_i,1)
-  A[,"norm_admin"] <- ceiling(norm_curve) #ceiling(rnorm(ndays_i,inc_rate,1)) #  depends on normal number of bed days / LOS of hospital
-  A[,"cov_admin"] <- ceiling(cov_curve)
-  A[,"prop_cov"] <- A$cov_admin/(A$norm_admin + A$cov_admin)
-  A0 <- A
-  
-  #CRITICAL BED DAYS
-  WC <- array(0,c(nbeds,3,(ndays_i+1))) # Array - 3D matrix. 
-  colnames(WC)<-c("patno","status","pat_age")
-  #NEW BEDS NEEDED
-  WN <- array(0,c(5000,3,(ndays_i+1))) # Array - 3D matrix. 
-  colnames(WN)<-c("patno","status","pat_age")
-  # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
-  
-  # track number of patients 
-  pat_num <- 0
-  
-  ###############**********************************************************************
-  ### ICU BEDS ###
-  ###############**********************************************************************
-  
-  # Want to know how many enter the ICU each day
-  # And how many discharge / deaths
-  ICU_fill <- as.data.frame(matrix(0,9*ndays_i,5)) # 9 AGE groups
-  colnames(ICU_fill) <- c("day","norm","cov","discharge","death") # FIXED COLUMN ORDER
-  ICU_fill$day <- seq(1,ndays_i,1)
-  
-  # fill by bed
-  for(i in 1:nbeds){
-    
-    cumlos <- 0 # DAY ZERO
-    
-    # first patient in bed
-    pat_num <- pat_num + 1
-    pat_age <- sample(seq(1,9,1),prob=age_data$prop,1) # sample from region population atm - could be differs for ICU
-    if(runif(1) < 0.2){ # 20% empty beds
-      pat_status <- 3 # Empty bed
-      los <- 1 # check next day for patient
-    }else{
-      pat_status <- 0 # normal patient in initially - assume v low prevalence of COVID
-      los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
-      ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
-    }
-    
-    WC[i,c("patno","status","pat_age"),1:los] <- c(pat_num,pat_status,pat_age)
-    pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
-    ICU_fill[1,(pat_outcome+4)] <- ICU_fill[1,(pat_outcome+4)] + 1
-    
-    cumlos <- cumlos + los
-    
-    # FILL BEDS
-    while(cumlos < (ndays_i+1)){
-      #print(cumlos)
-      pat_num <- pat_num + 1 # Next patient
-      ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
-      if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
-        pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
-        if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
-        if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
-        
-        if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
-          
-          ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-          
-          
-        }else{
-          pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
-          # don't need to check if patient of this type as know sum (A) > 0
-          
-          ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
-                                         A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          
-          
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-        }
-      }else{
-        los <- 1
-        pat_status <- 3 # EMPTY BED
-        pat_num <- pat_num - 1 # No patient
-      }
-      
-      # If empty bed don't store patient number 
-      if(pat_status == 3){
-        WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status,0) # this patient stays until end of los
-      }else{
-        WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status,pat_age) # this patient stays until end of los
-      }
-      
-      cumlos <- cumlos + los # next new patient at this time point
-      # Patient outcome
-      pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
-      ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
-    }
-    
-  }
-  Aleft <- A
-  
-  i = 1
-  #print(pat_num)
-  # Extra beds needed
-  while( sum(A$norm_admin + A$cov_admin) > 0){
-    
-    cumlos <- 1
-    WN[i,c("patno","status"),1] <- c(pat_num+1,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
-    
-    while(cumlos < (ndays_i + 1)){
-      #print(c("1",cumlos, pat_num,pat_status))
-      pat_num <- pat_num + 1 # Next patient
-      
-      #  print(c("2",cumlos, pat_num,pat_status))
-      ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
-      if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
-        #print(c(cumlos,pat_status))
-        
-        pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
-        if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
-        if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
-        
-        if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted on that day
-          
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-          
-        }else{
-          pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
-          # don't need to check if patient of this type as know sum (A) > 0
-          
-          A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
-          A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
-                                         A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
-          los <- ceiling(ifelse(pat_status == 1, 
-                                sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
-                                rnorm(1,los_norm))) # length of stay
-        }
-      }else{
-        los <- 1
-        pat_status <- 3 # EMPTY BED
-        pat_num <- pat_num - 1 # No patient
-      }
-      # print(c("3",cumlos, pat_num,pat_status))
-      # If empty bed don't store patient number 
-      
-      if(pat_status == 3){
-        WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
-      }else{
-        WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
-      }
-      
-      cumlos <- cumlos + los # next new patient at this time point
-      # Patient outcome
-      pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
-      ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
-      
-      # print(c("4",cumlos, pat_num,pat_status))
-    }
-    i = i + 1 # move on to next bed
-    
-  }
-  
-  
-  return(list(A0 = A0, A = A, Aleft = Aleft, WC = WC, WN = WN, pat_num = pat_num, ICU_fill = ICU_fill))
-  
-}
+# bed_filling_age <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 90, age_data){
+#   
+#   ## Admissions 
+#   An <- as.data.frame(matrix(0,ndays_i,4)) # NORMAL
+#   Ac <- as.data.frame(matrix(0,ndays_i,4)) # COVID
+#   colnames(An) <- c("day",seq(1,9,1)) # day then ages
+#   colnames(An) <- c("day",seq(1,9,1)) # day then ages
+#   
+#   
+#   A[,"day"] <- seq(1,ndays_i,1)
+#   A[,"norm_admin"] <- ceiling(norm_curve) #ceiling(rnorm(ndays_i,inc_rate,1)) #  depends on normal number of bed days / LOS of hospital
+#   A[,"cov_admin"] <- ceiling(cov_curve)
+#   A[,"prop_cov"] <- A$cov_admin/(A$norm_admin + A$cov_admin)
+#   A0 <- A
+#   
+#   #CRITICAL BED DAYS
+#   WC <- array(0,c(nbeds,3,(ndays_i+1))) # Array - 3D matrix. 
+#   colnames(WC)<-c("patno","status","pat_age")
+#   #NEW BEDS NEEDED
+#   WN <- array(0,c(5000,3,(ndays_i+1))) # Array - 3D matrix. 
+#   colnames(WN)<-c("patno","status","pat_age")
+#   # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
+#   
+#   # track number of patients 
+#   pat_num <- 0
+#   
+#   ###############**********************************************************************
+#   ### ICU BEDS ###
+#   ###############**********************************************************************
+#   
+#   # Want to know how many enter the ICU each day
+#   # And how many discharge / deaths
+#   ICU_fill <- as.data.frame(matrix(0,9*ndays_i,5)) # 9 AGE groups
+#   colnames(ICU_fill) <- c("day","norm","cov","discharge","death") # FIXED COLUMN ORDER
+#   ICU_fill$day <- seq(1,ndays_i,1)
+#   
+#   # fill by bed
+#   for(i in 1:nbeds){
+#     
+#     cumlos <- 0 # DAY ZERO
+#     
+#     # first patient in bed
+#     pat_num <- pat_num + 1
+#     pat_age <- sample(seq(1,9,1),prob=age_data$prop,1) # sample from region population atm - could be differs for ICU
+#     if(runif(1) < 0.2){ # 20% empty beds
+#       pat_status <- 3 # Empty bed
+#       los <- 1 # check next day for patient
+#     }else{
+#       pat_status <- 0 # normal patient in initially - assume v low prevalence of COVID
+#       los <- ceiling(rnorm(1,los_norm) * runif(1)) # been in for some time already perhaps
+#       ICU_fill[1,(pat_status+2)] <- ICU_fill[1,(pat_status+2)] + 1
+#     }
+#     
+#     WC[i,c("patno","status","pat_age"),1:los] <- c(pat_num,pat_status,pat_age)
+#     pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+#     ICU_fill[1,(pat_outcome+4)] <- ICU_fill[1,(pat_outcome+4)] + 1
+#     
+#     cumlos <- cumlos + los
+#     
+#     # FILL BEDS
+#     while(cumlos < (ndays_i+1)){
+#       #print(cumlos)
+#       pat_num <- pat_num + 1 # Next patient
+#       ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
+#       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
+#         #print(c(cumlos,pat_status))
+#         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+#         if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
+#         if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
+#         
+#         if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted
+#           
+#           ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
+#           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#           
+#           los <- ceiling(ifelse(pat_status == 1, 
+#                                 sample(los_cov, 1), #rnorm(1,los_cov), 
+#                                 rnorm(1,los_norm))) # length of stay
+#           
+#           
+#           
+#         }else{
+#           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
+#           # don't need to check if patient of this type as know sum (A) > 0
+#           
+#           ICU_fill[cumlos,(pat_status+2)] <- ICU_fill[cumlos,(pat_status+2)] + 1 # count of filled beds
+#           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
+#                                          A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#           
+#           
+#           los <- ceiling(ifelse(pat_status == 1, 
+#                                 sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
+#                                 rnorm(1,los_norm))) # length of stay
+#           
+#         }
+#       }else{
+#         los <- 1
+#         pat_status <- 3 # EMPTY BED
+#         pat_num <- pat_num - 1 # No patient
+#       }
+#       
+#       # If empty bed don't store patient number 
+#       if(pat_status == 3){
+#         WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status,0) # this patient stays until end of los
+#       }else{
+#         WC[i,c("patno","status","pat_age"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status,pat_age) # this patient stays until end of los
+#       }
+#       
+#       cumlos <- cumlos + los # next new patient at this time point
+#       # Patient outcome
+#       pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+#       ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+#     }
+#     
+#   }
+#   Aleft <- A
+#   
+#   i = 1
+#   #print(pat_num)
+#   # Extra beds needed
+#   while( sum(A$norm_admin + A$cov_admin) > 0){
+#     
+#     cumlos <- 1
+#     WN[i,c("patno","status"),1] <- c(pat_num+1,3) # First day empty. A > 0 so will have a new patient to admit but not here and now
+#     
+#     while(cumlos < (ndays_i + 1)){
+#       #print(c("1",cumlos, pat_num,pat_status))
+#       pat_num <- pat_num + 1 # Next patient
+#       
+#       #  print(c("2",cumlos, pat_num,pat_status))
+#       ### COMPLICATED BY NEED TO HAVE PATIENTS TO ADMIT
+#       if(sum(A[cumlos,c("norm_admin","cov_admin")]) > 0){ # if there is a patient to be admitted
+#         #print(c(cumlos,pat_status))
+#         
+#         pat_status <- ifelse(runif(1) < A$prop_cov[cumlos],1,0) # 1 = COVID positive or not (0)?
+#         if(pat_status == 1){pat_age <- sample(seq(1,9,1),prob = A$cov_admin[cumlos],1)} # Sample age from covid patients
+#         if(pat_status == 0){pat_age <- sample(seq(1,9,1),prob = A$norm_admin[cumlos],1)} # Sample age from norm patients
+#         
+#         if(A[cumlos,(pat_status+2)] > 0){ # if there is a patient of this type to be admitted on that day
+#           
+#           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#           los <- ceiling(ifelse(pat_status == 1, 
+#                                 sample(los_cov, 1, replace = TRUE), #rnorm(1,los_cov), 
+#                                 rnorm(1,los_norm))) # length of stay
+#           
+#         }else{
+#           pat_status <- ifelse(pat_status == 1, 0, 1) # switch status
+#           # don't need to check if patient of this type as know sum (A) > 0
+#           
+#           A[cumlos, (pat_status+2)] <- A[cumlos, (pat_status+2)] - 1 # remove from admin
+#           A[cumlos,"prop_cov"] <- ifelse((A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"])>0,
+#                                          A[cumlos,"cov_admin"] / (A[cumlos,"norm_admin"] + A[cumlos,"cov_admin"]),0)
+#           los <- ceiling(ifelse(pat_status == 1, 
+#                                 sample(los_cov, 10, replace = TRUE),#rnorm(1,los_cov), 
+#                                 rnorm(1,los_norm))) # length of stay
+#         }
+#       }else{
+#         los <- 1
+#         pat_status <- 3 # EMPTY BED
+#         pat_num <- pat_num - 1 # No patient
+#       }
+#       # print(c("3",cumlos, pat_num,pat_status))
+#       # If empty bed don't store patient number 
+#       
+#       if(pat_status == 3){
+#         WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(0,pat_status) # this patient stays until end of los
+#       }else{
+#         WN[i,c("patno","status"),pmin((cumlos + (1:los)),ndays_i)] <- c(pat_num,pat_status) # this patient stays until end of los
+#       }
+#       
+#       cumlos <- cumlos + los # next new patient at this time point
+#       # Patient outcome
+#       pat_outcome <- ifelse(runif(1) < age_data[pat_age,"p_discharge"],0,1) # 1 = death
+#       ICU_fill[cumlos,(pat_outcome+4)] <- ICU_fill[cumlos,(pat_outcome+4)] + 1
+#       
+#       # print(c("4",cumlos, pat_num,pat_status))
+#     }
+#     i = i + 1 # move on to next bed
+#     
+#   }
+#   
+#   
+#   return(list(A0 = A0, A = A, Aleft = Aleft, WC = WC, WN = WN, pat_num = pat_num, ICU_fill = ICU_fill))
+#   
+# }
 
 ### Multiple runs
 
-multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, ndays_i = 14){
+multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, ndays_i = 17,pdischarge){
   
   h_store<-c()
   missing_store <- c() #matrix(0,100*ndays_i,5)
@@ -564,7 +580,7 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     if(length(inc_rate == 1)){norm_curve <- rnorm(ndays_i,inc_rate,1)
     }else{norm_curve <- inc_rate}
     
-    output <- bed_filling(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 14)
+    output <- bed_filling(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17,pdischarge)
     
     h <- melt(output$WC,id.vars = "patno")
     colnames(h) <- c("bedno","variable","time","value")
@@ -641,7 +657,7 @@ sigmoid = function(params, x) {
 
 plot_eg <- function(output, name, norm_curve, cov_curve){
   
-  ndays_i <- dim(output$ICU_fill)[1]
+  ndays_i <- length(norm_curve)
   cols <- c("3" = "lightblue", "1" = "orange", "0" = "purple")
   # Grab data
   # Basic time data to ndays_i days
@@ -708,13 +724,13 @@ plot_eg <- function(output, name, norm_curve, cov_curve){
     geom_point(aes(col = factor(status))) + 
     scale_colour_manual(name  ="Status",values = cols,breaks=c("0", "3","1"),labels=c("Normal", "Empty","COVID")) + 
     xlab("Day") + ylab("Bed number") + 
-    scale_y_continuous(lim=c(0,ymax)) +
-    annotate(size = 2,'text',10, 15, 
-             label=paste("Extra beds needed:",mm)) #+
+    scale_y_continuous(lim=c(0,ymax)) 
+  annotate(size = 2,'text',10, 15, 
+           label=paste("Extra beds needed:",mm)) #+
   #geom_vline(xintercept = c(30,60,90),col="grey",lty = "dashed")
   
   ggsave(paste0("plots/extra_beds_",name,".pdf"))
-
+  
   (p2+p1)/(p3+g)
   ggsave(paste0("plots/eg_square_",name,".pdf"))
   
