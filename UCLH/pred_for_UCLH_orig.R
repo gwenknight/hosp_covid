@@ -5,7 +5,7 @@ library(reshape2)
 library(patchwork)
 library(gridGraphics)
 library(tidyverse)
-
+theme_set(theme_bw(base_size=12)) # theme setting for plots: black and white (bw) and font size (24)
 #### FUNCTIONS
 source("functions_hosp_covid.R")
 
@@ -33,7 +33,7 @@ cols <- c("3" = "lightblue", "1" = "red", "0" = "darkgreen")
 
 nruns = 100
 
-ndays = 17 # run for 2 weeks
+ndays = 50 # run for 2 weeks
 
 nbeds_uclh <- 61
 occ_bed_days_uclh <- 0.754 * nbeds_uclh # occupied beds
@@ -46,7 +46,7 @@ pdischarge$normal <- 1-0.083 # 8.3 die from HES
 #### PLOTS of inputs
 los_norm_icu_examples <- rgamma(10000, fit.gamma$estimate["shape"], fit.gamma$estimate["rate"])
 pdf("los_norm_uclh.pdf")
-h <- hist(los_norm_icu_examples, breaks = seq(0,50,1))
+h <- hist(los_norm_icu_examples, breaks = seq(0,100,1))
 dev.off()
 
 
@@ -55,10 +55,10 @@ dev.off()
 ####****************************************************************************************************************
 ####****************************************************************************************************************
 ### HIGH
-cov_curve_high <- c(rep(0,3),exp(0.18*seq(1,14,1)))
+cov_curve_high <- c(rep(0,3),exp(0.18*seq(1,47,1)))
 plot(cov_curve_high)
 
-norm_curve_uclh_half <- c(rep(inc_rate_uclh,3),seq(1,0.5,length.out = 14)*inc_rate_uclh) # flat then covid
+norm_curve_uclh_half <- c(rep(inc_rate_uclh,3),seq(1,0.5,length.out = 47)*inc_rate_uclh) # flat then covid
 
 M_high <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
                        cov_curve_high, ndays, inc_rate = norm_curve_uclh_half,pdischarge)
@@ -67,12 +67,12 @@ plot_multiple(M_high,paste0("UCLH_high"))
 
 # e.g. 
 #norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_high,norm_curve_uclh_half,ndays=17,pdischarge)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_high,norm_curve_uclh_half,ndays=50,pdischarge)
 plot_eg(output_eg, paste0("UCLH_high"),norm_curve_uclh_half, cov_curve_high)
 
 
 ### LOW
-cov_curve_low <- c(rep(0,3),exp(0.02*seq(1,14,1)))
+cov_curve_low <- c(rep(0,3),exp(0.02*seq(1,47,1)))
 plot(cov_curve_low)
 
 M_low <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
@@ -81,12 +81,11 @@ M_low <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov,
 plot_multiple(M_low,paste0("UCLH_low"))
 
 # e.g. 
-norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_low,norm_curve_uclh_half,ndays=17,pdischarge)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_low,norm_curve_uclh_half,ndays=50,pdischarge)
 plot_eg(output_eg, paste0("UCLH_low"),norm_curve_uclh_half, cov_curve_low)
 
 ### MEDIUM
-cov_curve_med <- c(rep(0,3),exp(0.1*seq(1,14,1)))
+cov_curve_med <- c(rep(0,3),exp(0.1*seq(1,47,1)))
 plot(cov_curve_med)
 
 M_med <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov, 
@@ -95,22 +94,63 @@ M_med <- multiple_runs(nruns, nbeds = nbeds_uclh, los_norm_icu, los_cov,
 plot_multiple(M_med,paste0("UCLH_med"))
 
 # e.g. 
-norm_curve_uclh <- rnorm(ndays,inc_rate_uclh,1)
-output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_med,norm_curve_uclh_half,ndays=17,pdischarge)
+output_eg <- bed_filling(nbeds_uclh, los_norm_icu, los_cov, cov_curve_med,norm_curve_uclh_half,ndays=50,pdischarge)
 plot_eg(output_eg, paste0("UCLH_med"),norm_curve_uclh_half, cov_curve_med)
+
+#### PIETRO
+p_curve <-read.csv("UCLH/data/200326_pietro_preds.csv")
+p_curve$date <- as.Date(p_curve$date, tryFormats = c("%d/%m/%Y"))
+ggplot(p_curve, aes(x=date, y = covid_curve)) + geom_line() 
+
+cov_curve_pietro <- p_curve$covid_curve
+plot(cov_curve_pietro)
+norm_curve_uclh_half_pietro <- c(rep(inc_rate_uclh,3),
+                          seq(1,0.2,length.out = 21)*inc_rate_uclh,
+                          rep(0.2*inc_rate_uclh,length(cov_curve_pietro) - 21 - 3)) # flat then covid
+
+#### PIETRO
+p_curve <-read.csv("UCLH/data/200326_pietro_preds.csv")
+p_curve$date <- as.Date(p_curve$date, tryFormats = c("%d/%m/%Y"))
+ggplot(p_curve, aes(x=date, y = covid_curve)) + geom_line() 
+
+cov_curve_pietro <- p_curve$covid_curve
+plot(cov_curve_pietro)
+norm_curve_uclh_half_pietro <- c(rep(inc_rate_uclh,3),
+                                 seq(1,0.2,length.out = 21)*inc_rate_uclh,
+                                 rep(0.2*inc_rate_uclh,length(cov_curve_pietro) - 21 - 3)) # flat then covid
 
 
 #####**********
 # Scenario plot
 scen <- as.data.frame(cbind(seq(1,ndays,1),norm_curve_uclh_half, cov_curve_high, cov_curve_low,cov_curve_med))
+scen2 <- as.data.frame(cbind(seq(1,length(cov_curve_pietro),1),norm_curve_uclh_half_pietro,cov_curve_pietro))
 colnames(scen) <- c("time","norm","cov_high","cov_low","cov_med")
+colnames(scen2) <- c("time","norm","cov_pietro")
 scenm <- melt(scen, id.vars = "time")
+scenm2 <- melt(scen2, id.vars = "time")
+
+ggplot(scenm, aes(x=time, y = value)) + geom_line(aes(group = variable, col = variable)) + 
+  scale_x_continuous("Day") + scale_y_continuous(limits = c(0,25),"Daily admission need") +
+  scale_colour_discrete(name ="Scenario",labels=c("Non-COVID patient","COVID High","COVID Low","COVID Medium")) +
+  geom_hline(yintercept = inc_rate_uclh, lty = "dotted") + theme_bw() 
+ggsave("plots/scenarios_low_med_high_uclh.pdf")
 
 ggplot(scenm, aes(x=time, y = value)) + geom_line(aes(group = variable, col = variable)) + 
   scale_x_continuous("Day") + scale_y_continuous("Daily admission need") +
   scale_colour_discrete(name ="Scenario",labels=c("Non-COVID patient","COVID High","COVID Low","COVID Medium")) +
-  geom_hline(yintercept = inc_rate_uclh, lty = "dotted") + theme_bw()
-ggsave("plots/scenarios_uclh.pdf")
+  geom_hline(yintercept = inc_rate_uclh, lty = "dotted") + theme_bw() + 
+  geom_line(data = scenm2, aes(x = time, y = value, group = variable)) + 
+  scale_colour_discrete(name = "Scenario")
+ggsave("plots/scenarios_pietro_uclh.pdf")
+
+ggplot(scenm, aes(x=time, y = value)) + geom_line(aes(group = variable, col = variable)) + 
+  scale_x_continuous(limits = c(0,20),"Day") + scale_y_continuous(limits = c(0,25),"Daily admission need") +
+  scale_colour_discrete(name ="Scenario",labels=c("Non-COVID patient","COVID High","COVID Low","COVID Medium")) +
+  geom_hline(yintercept = inc_rate_uclh, lty = "dotted") + theme_bw() + 
+  geom_line(data = scenm2, aes(x = time, y = value, group = variable))
+ggsave("plots/scenarios_pietro_uclh_zoom.pdf")
+
+
 
 #####***** PLOT together
 M_all_m <- as.data.frame(cbind(M_high$total_beds_time[,c("time","mbed")],
@@ -136,7 +176,7 @@ ggplot(M_all,aes(x=time, y = mean.need, group = variable)) +
   geom_line(aes(y = mean.need)) + 
   scale_fill_discrete("Scenario") + 
   scale_y_continuous("Number of beds needed") + 
-  scale_x_continuous("Days",lim = c(3,17)) + 
+  scale_x_continuous("Days",lim = c(3,50)) + 
   geom_hline(yintercept = nbeds, col = "red",lty = "dashed") + theme_bw()
 
 ggsave(paste0("plots/bed_need_overtime_","UCLH",".pdf"))

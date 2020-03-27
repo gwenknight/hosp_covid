@@ -5,7 +5,7 @@
 # cov_curve = changing NUMBER of patients that are covid+
 # inc_rate = ICNHT data
 
-bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17, pdischarge){
+bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 50, pdischarge){
   
   ## Admissions 
   A <- as.data.frame(matrix(0,ndays_i,4))
@@ -20,7 +20,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
   WC <- array(0,c(nbeds,2,(ndays_i+1))) # Array - 3D matrix. 
   colnames(WC)<-c("patno","status")
   #NEW BEDS NEEDED
-  WN <- array(0,c(1000,2,(ndays_i+1))) # Array - 3D matrix. 
+  WN <- array(0,c(3000,2,(ndays_i+1))) # Array - 3D matrix. 
   colnames(WN)<-c("patno","status")
   # rows = bed, columns = c(patient number, actual status, presumed status, days in hospital), 3D = time
   
@@ -210,7 +210,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
   
 }
 
-# #bed_filling_uclh <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17){
+# #bed_filling_uclh <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 50){
 # 
 # ## Admissions 
 # A <- as.data.frame(matrix(0,ndays_i,4))
@@ -567,7 +567,7 @@ bed_filling <- function(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i
 
 ### Multiple runs
 
-multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, ndays_i = 17,pdischarge){
+multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, ndays_i = 50,pdischarge){
   
   h_store<-c()
   missing_store <- c() #matrix(0,100*ndays_i,5)
@@ -581,7 +581,7 @@ multiple_runs <- function(nruns, nbeds, los_norm, los_cov, cov_curve, inc_rate, 
     if(length(inc_rate == 1)){norm_curve <- rnorm(ndays_i,inc_rate,1)
     }else{norm_curve <- inc_rate}
     
-    output <- bed_filling(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 17,pdischarge)
+    output <- bed_filling(nbeds, los_norm, los_cov, cov_curve, norm_curve, ndays_i = 50,pdischarge)
     
     h <- melt(output$WC,id.vars = "patno")
     colnames(h) <- c("bedno","variable","time","value")
